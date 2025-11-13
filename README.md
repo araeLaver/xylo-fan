@@ -14,7 +14,6 @@ K-POP 팬덤 기반 RWA 블록체인 플랫폼
 - 실시간 리더보드 (ALL, 1D, 1W, 1M, 3M)
 - ERC-3525 SBT 기반 활동 기록
 - NFT 시스템 (티어형, 리워드형, 커넥션형)
-- 소셜 통합 (Twitter, Discord, YouTube)
 - 추천 시스템
 
 ---
@@ -46,7 +45,7 @@ xylo-fan/
 │   │   │   ├── strategies/               # Passport 전략
 │   │   │   │   ├── jwt.strategy.ts       # JWT 인증
 │   │   │   │   ├── twitter.strategy.ts   # Twitter OAuth 1.0a
-│   │   │   │   └── discord.strategy.ts   # Discord OAuth
+│   │   │   │   └── discord.strategy.ts   # Discord OAuth(X)
 │   │   │   ├── guards/                   # 인증 가드
 │   │   │   ├── email/                    # 이메일 서비스
 │   │   │   ├── dto/                      # DTO (인증 관련)
@@ -251,12 +250,6 @@ TWITTER_CONSUMER_KEY="your-key"
 TWITTER_CONSUMER_SECRET="your-secret"
 TWITTER_CALLBACK_URL="http://localhost:3000/api/v1/auth/twitter/callback"
 
-# Discord OAuth
-DISCORD_CLIENT_ID="your-client-id"
-DISCORD_CLIENT_SECRET="your-client-secret"
-DISCORD_CALLBACK_URL="http://localhost:3000/api/v1/auth/discord/callback"
-DISCORD_SERVER_ID="your-server-id"
-
 # Email
 SMTP_HOST="smtp.gmail.com"
 SMTP_PORT="587"
@@ -339,7 +332,6 @@ npm run test
 
 ### 인증
 - `GET /api/v1/auth/twitter` - Twitter OAuth
-- `GET /api/v1/auth/discord` - Discord OAuth
 - `POST /api/v1/auth/login` - 이메일 로그인
 
 ### 사용자
@@ -407,11 +399,6 @@ npm run test
 1. https://developer.twitter.com/en/portal/dashboard
 2. Create Project → Create App
 3. Keys and tokens 복사
-
-### Discord OAuth
-1. https://discord.com/developers/applications
-2. New Application 생성
-3. OAuth2 → Client ID/Secret 복사
 
 ### YouTube API
 1. https://console.cloud.google.com/
