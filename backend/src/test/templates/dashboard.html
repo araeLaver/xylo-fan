@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>XYLO Backend Test Dashboard</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f5f7fa;
+      min-height: 100vh;
+    }
+
+    /* 헤더 */
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px 30px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .header h1 {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+
+    .header p {
+      opacity: 0.9;
+      font-size: 14px;
+    }
+
+    /* 테스트 유저 선택 */
+    .user-selector {
+      background: white;
+      padding: 15px 30px;
+      border-bottom: 1px solid #e0e0e0;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .user-selector label {
+      font-weight: 600;
+      color: #333;
+    }
+
+    .user-selector select {
+      padding: 8px 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 14px;
+      min-width: 200px;
+    }
+
+    .user-selector button {
+      padding: 8px 15px;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .user-selector button:hover {
+      background: #5568d3;
+    }
+
+    .user-info {
+      margin-left: auto;
+      padding: 8px 15px;
+      background: #f0f4ff;
+      border-radius: 6px;
+      font-size: 13px;
+      color: #667eea;
+    }
+
+    /* 메인 레이아웃 */
+    .main-layout {
+      display: flex;
+      min-height: calc(100vh - 140px);
+    }
+
+    /* 사이드바 */
+    .sidebar {
+      width: 250px;
+      background: white;
+      border-right: 1px solid #e0e0e0;
+      overflow-y: auto;
+    }
+
+    .sidebar-menu {
+      list-style: none;
+    }
+
+    .sidebar-menu li {
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .sidebar-menu a {
+      display: block;
+      padding: 15px 20px;
+      color: #333;
+      text-decoration: none;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+
+    .sidebar-menu a:hover {
+      background: #f8f9fa;
+      color: #667eea;
+    }
+
+    .sidebar-menu a.active {
+      background: #667eea;
+      color: white;
+      font-weight: 600;
+    }
+
+    .sidebar-menu a::before {
+      margin-right: 10px;
+    }
+
+    /* 메인 컨텐츠 */
+    .main-content {
+      flex: 1;
+      padding: 30px;
+      overflow-y: auto;
+    }
+
+    /* 섹션 */
+    .section {
+      display: none;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    .section-header {
+      margin-bottom: 20px;
+    }
+
+    .section-header h2 {
+      font-size: 24px;
+      color: #333;
+      margin-bottom: 5px;
+    }
+
+    .section-header p {
+      color: #666;
+      font-size: 14px;
+    }
+
+    /* 카드 */
+    .card {
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      margin-bottom: 20px;
+    }
+
+    .card h3 {
+      font-size: 18px;
+      color: #333;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+
+    /* 입력 그룹 */
+    .input-group {
+      margin-bottom: 15px;
+    }
+
+    .input-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 600;
+      color: #333;
+      font-size: 14px;
+    }
+
+    .input-group input,
+    .input-group select,
+    .input-group textarea {
+      width: 100%;
+      padding: 10px 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 14px;
+      transition: border-color 0.3s;
+    }
+
+    .input-group input:focus,
+    .input-group select:focus,
+    .input-group textarea:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    .input-group textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    /* 버튼 */
+    button {
+      padding: 12px 24px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    button.secondary {
+      background: #6c757d;
+    }
+
+    button.danger {
+      background: #dc3545;
+    }
+
+    button.success {
+      background: #28a745;
+    }
+
+    /* 결과 표시 */
+    .result {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    .result.success {
+      background: #d4edda;
+      border: 1px solid #c3e6cb;
+      color: #155724;
+    }
+
+    .result.error {
+      background: #f8d7da;
+      border: 1px solid #f5c6cb;
+      color: #721c24;
+    }
+
+    .result.info {
+      background: #d1ecf1;
+      border: 1px solid #bee5eb;
+      color: #0c5460;
+    }
+
+    .result.warning {
+      background: #fff3cd;
+      border: 1px solid #ffeeba;
+      color: #856404;
+    }
+
+    /* 테이블 */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    th {
+      background: #f8f9fa;
+      font-weight: 600;
+      color: #333;
+    }
+
+    tr:hover {
+      background: #f8f9fa;
+    }
+
+    /* 로딩 */
+    .loading {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 3px solid rgba(255,255,255,.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* 뱃지 */
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .badge.primary {
+      background: #667eea;
+      color: white;
+    }
+
+    .badge.success {
+      background: #28a745;
+      color: white;
+    }
+
+    .badge.danger {
+      background: #dc3545;
+      color: white;
+    }
+
+    .badge.warning {
+      background: #ffc107;
+      color: #333;
+    }
+
+    /* Flex 유틸리티 */
+    .flex {
+      display: flex;
+    }
+
+    .flex-between {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .flex-gap {
+      gap: 10px;
+    }
+
+    .mt-20 {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <!-- 헤더 -->
+  <div class="header">
+    <h1>🚀 XYLO Backend Test Dashboard</h1>
+    <p>모든 백엔드 기능을 테스트할 수 있는 통합 관리 페이지입니다.</p>
+  </div>
+
+  <!-- 테스트 유저 선택 -->
+  <div class="user-selector">
+    <label>🧪 테스트 유저:</label>
+    <select id="userSelect" onchange="changeUser()">
+      <option value="00000000-0000-0000-0000-000000000000">Test User (기본)</option>
+    </select>
+    <button onclick="loadUsers()">🔄 새로고침</button>
+    <button onclick="createTestUser()">➕ 새 테스트 유저 생성</button>
+    <div class="user-info" id="userInfo">
+      User ID: 00000000-0000-0000-0000-000000000000
+    </div>
+  </div>
+
+  <!-- 메인 레이아웃 -->
+  <div class="main-layout">
+    <!-- 사이드바 -->
+    <div class="sidebar">
+      <ul class="sidebar-menu">
+        <li><a href="#" onclick="showSection('overview')" class="active">📊 Overview</a></li>
+        <li><a href="#" onclick="showSection('youtube')">📺 YouTube</a></li>
+        <li><a href="#" onclick="showSection('points')">💰 Points</a></li>
+        <li><a href="#" onclick="showSection('leaderboard')">🏆 Leaderboard</a></li>
+        <li><a href="#" onclick="showSection('referral')">👥 Referral</a></li>
+        <li><a href="#" onclick="showSection('nft')">🎨 NFT</a></li>
+        <li><a href="#" onclick="showSection('tutorial')">📚 Tutorial</a></li>
+        <li><a href="#" onclick="showSection('faq')">❓ FAQ</a></li>
+        <li><a href="#" onclick="showSection('events')">🎪 Events</a></li>
+      </ul>
+    </div>
+
+    <!-- 메인 컨텐츠 -->
+    <div class="main-content">
+      <!-- Overview 섹션 -->
+      <div id="section-overview" class="section active">
+        <div class="section-header">
+          <h2>📊 Dashboard Overview</h2>
+          <p>각 모듈의 상태를 한눈에 확인할 수 있습니다.</p>
+        </div>
+
+        <div class="flex" style="gap: 20px; flex-wrap: wrap;">
+          <div class="card" style="flex: 1; min-width: 300px;">
+            <h3>🎯 Quick Stats</h3>
+            <div id="quickStats">
+              <p>데이터를 불러오는 중...</p>
+            </div>
+          </div>
+
+          <div class="card" style="flex: 1; min-width: 300px;">
+            <h3>📋 Recent Activity</h3>
+            <div id="recentActivity">
+              <p>활동 내역이 없습니다.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card mt-20">
+          <h3>🔗 Quick Links</h3>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+            <button onclick="showSection('youtube')">📺 YouTube 테스트</button>
+            <button onclick="showSection('points')">💰 Points 관리</button>
+            <button onclick="showSection('leaderboard')">🏆 Leaderboard 확인</button>
+            <button onclick="showSection('referral')">👥 Referral 테스트</button>
+            <button onclick="showSection('nft')">🎨 NFT 관리</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- YouTube 섹션 (기존 기능 유지) -->
+      <div id="section-youtube" class="section">
+        <div class="section-header">
+          <h2>📺 YouTube Channel Management</h2>
+          <p>YouTube 채널 인증 및 쇼츠 관리를 테스트할 수 있습니다.</p>
+        </div>
+        <div id="youtubeContent">
+          <!-- 기존 YouTube 테스트 내용이 여기 들어갑니다 -->
+          <p>YouTube 섹션 로딩 중...</p>
+        </div>
+      </div>
+
+      <!-- Points 섹션 -->
+      <div id="section-points" class="section">
+        <div class="section-header">
+          <h2>💰 Points Management</h2>
+          <p>포인트 조회, 추가, 히스토리 관리를 테스트할 수 있습니다.</p>
+        </div>
+
+        <!-- 현재 포인트 조회 -->
+        <div class="card">
+          <h3>📊 현재 포인트 조회</h3>
+          <button onclick="getCurrentPoints()">🔍 포인트 조회</button>
+          <div id="currentPointsResult"></div>
+        </div>
+
+        <!-- 포인트 추가 -->
+        <div class="card">
+          <h3>➕ 포인트 추가</h3>
+          <div class="input-group">
+            <label>카테고리</label>
+            <select id="pointCategory">
+              <option value="CONTENT">CONTENT (컨텐츠)</option>
+              <option value="REFERRAL">REFERRAL (추천)</option>
+              <option value="EVENT">EVENT (이벤트)</option>
+              <option value="PROFIT">PROFIT (수익)</option>
+              <option value="BOOST">BOOST (부스트)</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label>포인트</label>
+            <input type="number" id="pointAmount" placeholder="100" value="100">
+          </div>
+          <div class="input-group">
+            <label>사유</label>
+            <input type="text" id="pointReason" placeholder="테스트 포인트 지급" value="테스트 포인트 지급">
+          </div>
+          <button onclick="addPoints()">💰 포인트 추가</button>
+          <div id="addPointsResult"></div>
+        </div>
+
+        <!-- 포인트 히스토리 -->
+        <div class="card">
+          <h3>📜 포인트 히스토리</h3>
+          <button onclick="getPointsHistory()">📋 히스토리 조회</button>
+          <div id="pointsHistoryResult"></div>
+        </div>
+      </div>
+
+      <!-- Leaderboard 섹션 -->
+      <div id="section-leaderboard" class="section">
+        <div class="section-header">
+          <h2>🏆 Leaderboard</h2>
+          <p>리더보드 순위, Top 3, 통계를 확인할 수 있습니다.</p>
+        </div>
+
+        <div class="card">
+          <h3>🥇 Top 3</h3>
+          <div class="input-group">
+            <label>기간</label>
+            <select id="leaderboardPeriod">
+              <option value="ALL">전체</option>
+              <option value="1D">1일</option>
+              <option value="1W">1주</option>
+              <option value="1M">1개월</option>
+              <option value="3M">3개월</option>
+            </select>
+          </div>
+          <button onclick="getTop3()">🏆 Top 3 조회</button>
+          <div id="top3Result"></div>
+        </div>
+
+        <div class="card">
+          <h3>📊 전체 리더보드</h3>
+          <button onclick="getLeaderboard()">📋 전체 순위 조회</button>
+          <div id="leaderboardResult"></div>
+        </div>
+
+        <div class="card">
+          <h3>👤 내 순위 조회</h3>
+          <button onclick="getMyRank()">🔍 내 순위 확인</button>
+          <div id="myRankResult"></div>
+        </div>
+      </div>
+
+      <!-- Referral 섹션 -->
+      <div id="section-referral" class="section">
+        <div class="section-header">
+          <h2>👥 Referral System</h2>
+          <p>추천 시스템을 테스트할 수 있습니다.</p>
+        </div>
+
+        <div class="card">
+          <h3>🔗 내 추천 링크</h3>
+          <button onclick="getMyReferralLink()">🔗 링크 생성</button>
+          <div id="referralLinkResult"></div>
+        </div>
+
+        <div class="card">
+          <h3>📊 추천 통계</h3>
+          <button onclick="getReferralStats()">📈 통계 조회</button>
+          <div id="referralStatsResult"></div>
+        </div>
+
+        <div class="card">
+          <h3>👥 내가 추천한 사람들</h3>
+          <button onclick="getMyReferrals()">👥 목록 조회</button>
+          <div id="myReferralsResult"></div>
+        </div>
+
+        <div class="card">
+          <h3>🔗 X 공유 URL 생성</h3>
+          <button onclick="getXShareUrl()">🐦 X 공유 링크 생성</button>
+          <div id="xShareUrlResult"></div>
+        </div>
+      </div>
+
+      <!-- NFT 섹션 -->
+      <div id="section-nft" class="section">
+        <div class="section-header">
+          <h2>🎨 NFT Management</h2>
+          <p>NFT 발급, 업그레이드, 소각을 테스트할 수 있습니다.</p>
+        </div>
+
+        <div class="card">
+          <h3>🖼️ 내 NFT 목록</h3>
+          <button onclick="getMyNfts()">🔍 NFT 조회</button>
+          <div id="myNftsResult"></div>
+        </div>
+
+        <div class="card">
+          <h3>🎫 UserPass 발급 자격 확인</h3>
+          <button onclick="checkUserPassEligibility()">✅ 자격 확인</button>
+          <div id="userPassEligibilityResult"></div>
+        </div>
+
+        <div class="card">
+          <h3>⬆️ Tier NFT 업그레이드</h3>
+          <div class="input-group">
+            <label>새로운 Tier</label>
+            <select id="newTier">
+              <option value="1">Tier 1</option>
+              <option value="2">Tier 2</option>
+              <option value="3">Tier 3</option>
+              <option value="4">Tier 4</option>
+              <option value="5">Tier 5</option>
+            </select>
+          </div>
+          <button onclick="upgradeTierNft()">⬆️ 업그레이드</button>
+          <div id="upgradeNftResult"></div>
+        </div>
+
+        <div class="card">
+          <h3>🎁 NFT 혜택 조회</h3>
+          <button onclick="getNftBenefits()">🎁 혜택 확인</button>
+          <div id="nftBenefitsResult"></div>
+        </div>
+      </div>
+
+      <!-- Tutorial 섹션 -->
+      <div id="section-tutorial" class="section">
+        <div class="section-header">
+          <h2>📚 Tutorial</h2>
+          <p>튜토리얼 상태를 관리할 수 있습니다.</p>
+        </div>
+
+        <div class="card">
+          <h3>📖 튜토리얼 상태 조회</h3>
+          <button onclick="getTutorialStatus()">🔍 상태 확인</button>
+          <div id="tutorialStatusResult"></div>
+        </div>
+
+        <div class="card">
+          <h3>✅ 튜토리얼 완료/스킵</h3>
+          <div style="display: flex; gap: 10px;">
+            <button onclick="completeTutorial('complete')">✅ 완료</button>
+            <button onclick="completeTutorial('skip')" class="secondary">⏭️ 스킵</button>
+          </div>
+          <div id="tutorialActionResult"></div>
+        </div>
+      </div>
+
+      <!-- FAQ 섹션 -->
+      <div id="section-faq" class="section">
+        <div class="section-header">
+          <h2>❓ FAQ Management</h2>
+          <p>FAQ 목록을 조회하고 관리할 수 있습니다.</p>
+        </div>
+
+        <div class="card">
+          <h3>📋 FAQ 목록</h3>
+          <button onclick="getFaqs()">📄 FAQ 조회</button>
+          <div id="faqsResult"></div>
+        </div>
+
+        <div class="card">
+          <h3>📂 FAQ 카테고리</h3>
+          <button onclick="getFaqCategories()">📂 카테고리 조회</button>
+          <div id="faqCategoriesResult"></div>
+        </div>
+      </div>
+
+      <!-- Events 섹션 -->
+      <div id="section-events" class="section">
+        <div class="section-header">
+          <h2>🎪 Events</h2>
+          <p>이벤트 참여 기능을 테스트할 수 있습니다.</p>
+        </div>
+
+        <div class="card">
+          <h3>🎉 이벤트 참여 테스트</h3>
+          <p>이벤트 기능이 준비 중입니다.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 현재 선택된 사용자 ID
+    let currentUserId = '00000000-0000-0000-0000-000000000000';
+
+    // 섹션 전환
+    function showSection(sectionName) {
+      // 모든 섹션 숨기기
+      document.querySelectorAll('.section').forEach(section => {
+        section.classList.remove('active');
+      });
+
+      // 모든 메뉴 아이템 비활성화
+      document.querySelectorAll('.sidebar-menu a').forEach(link => {
+        link.classList.remove('active');
+      });
+
+      // 선택한 섹션 표시
+      document.getElementById('section-' + sectionName).classList.add('active');
+
+      // 해당 메뉴 아이템 활성화
+      event.target.classList.add('active');
+    }
+
+    // 사용자 변경
+    function changeUser() {
+      currentUserId = document.getElementById('userSelect').value;
+      document.getElementById('userInfo').textContent = 'User ID: ' + currentUserId;
+    }
+
+    // 사용자 목록 로드
+    async function loadUsers() {
+      // TODO: 실제 API 연동
+      alert('사용자 목록 새로고침 (준비 중)');
+    }
+
+    // 테스트 유저 생성
+    async function createTestUser() {
+      // TODO: 실제 API 연동
+      alert('새 테스트 유저 생성 (준비 중)');
+    }
+
+    // ========== Points 관련 함수 ==========
+    async function getCurrentPoints() {
+      const resultDiv = document.getElementById('currentPointsResult');
+      resultDiv.innerHTML = '<p>로딩 중...</p>';
+
+      try {
+        const response = await fetch(`/api/v1/points/current/${currentUserId}`);
+        const data = await response.json();
+
+        if (response.ok) {
+          resultDiv.innerHTML = `
+            <div class="result success">
+              <h4>✅ 현재 포인트</h4>
+              <table>
+                <tr><th>항목</th><th>포인트</th></tr>
+                <tr><td>총 포인트</td><td><strong>${data.total_points?.toLocaleString() || 0}</strong></td></tr>
+                <tr><td>컨텐츠</td><td>${data.slot_01_content?.toLocaleString() || 0}</td></tr>
+                <tr><td>MGM (추천)</td><td>${data.slot_02_mgm?.toLocaleString() || 0}</td></tr>
+                <tr><td>이벤트</td><td>${data.slot_03_event?.toLocaleString() || 0}</td></tr>
+                <tr><td>수익</td><td>${data.slot_04_profit?.toLocaleString() || 0}</td></tr>
+                <tr><td>스폰서</td><td>${data.slot_05_sponsor?.toLocaleString() || 0}</td></tr>
+                <tr><td>부스트</td><td>${data.slot_06_boost?.toLocaleString() || 0}</td></tr>
+                <tr><td>SBT 가치</td><td>${data.sbt_value?.toLocaleString() || 0}</td></tr>
+              </table>
+            </div>
+          `;
+        } else {
+          throw new Error(data.message || '포인트 조회 실패');
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `<div class="result error">❌ ${error.message}</div>`;
+      }
+    }
+
+    async function addPoints() {
+      const category = document.getElementById('pointCategory').value;
+      const amount = parseInt(document.getElementById('pointAmount').value);
+      const reason = document.getElementById('pointReason').value;
+      const resultDiv = document.getElementById('addPointsResult');
+
+      resultDiv.innerHTML = '<p>처리 중...</p>';
+
+      try {
+        const response = await fetch('/api/v1/points/add', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: currentUserId,
+            category,
+            amount,
+            reason
+          })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          resultDiv.innerHTML = `
+            <div class="result success">
+              ✅ ${amount} 포인트가 추가되었습니다!<br>
+              카테고리: ${category}<br>
+              사유: ${reason}
+            </div>
+          `;
+          // 현재 포인트 자동 갱신
+          getCurrentPoints();
+        } else {
+          throw new Error(data.message || '포인트 추가 실패');
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `<div class="result error">❌ ${error.message}</div>`;
+      }
+    }
+
+    async function getPointsHistory() {
+      const resultDiv = document.getElementById('pointsHistoryResult');
+      resultDiv.innerHTML = '<p>로딩 중...</p>';
+
+      try {
+        const response = await fetch(`/api/v1/points/history/${currentUserId}?page=1&limit=10`);
+        const data = await response.json();
+
+        if (response.ok && data.history && data.history.length > 0) {
+          const rows = data.history.map(item => `
+            <tr>
+              <td>${new Date(item.created_at).toLocaleDateString()}</td>
+              <td><span class="badge primary">${item.category}</span></td>
+              <td><strong>${item.amount > 0 ? '+' : ''}${item.amount}</strong></td>
+              <td>${item.reason || '-'}</td>
+            </tr>
+          `).join('');
+
+          resultDiv.innerHTML = `
+            <div class="result success">
+              <h4>📜 포인트 히스토리 (최근 ${data.history.length}건)</h4>
+              <table>
+                <thead>
+                  <tr>
+                    <th>날짜</th>
+                    <th>카테고리</th>
+                    <th>포인트</th>
+                    <th>사유</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${rows}
+                </tbody>
+              </table>
+            </div>
+          `;
+        } else {
+          resultDiv.innerHTML = `<div class="result info">ℹ️ 포인트 히스토리가 없습니다.</div>`;
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `<div class="result error">❌ ${error.message}</div>`;
+      }
+    }
+
+    // ========== Leaderboard 관련 함수 ==========
+    async function getTop3() {
+      const period = document.getElementById('leaderboardPeriod').value;
+      const resultDiv = document.getElementById('top3Result');
+      resultDiv.innerHTML = '<p>로딩 중...</p>';
+
+      try {
+        const response = await fetch(`/api/v1/leaderboard/top3?period=${period}`);
+        const data = await response.json();
+
+        if (response.ok && data.length > 0) {
+          const medals = ['🥇', '🥈', '🥉'];
+          const cards = data.map((user, index) => `
+            <div style="background: ${index === 0 ? '#fff9e6' : index === 1 ? '#f0f0f0' : '#fff5e6'}; padding: 15px; border-radius: 8px; margin: 10px 0;">
+              <h4>${medals[index]} ${user.rank}위 - ${user.x_handle || 'Unknown'}</h4>
+              <p><strong>총 포인트:</strong> ${user.total_current?.toLocaleString() || 0}</p>
+              <p style="font-size: 12px; color: #666;">
+                컨텐츠: ${user.contents || 0} | MGM: ${user.mgm || 0} |
+                이벤트: ${user.event || 0} | 수익: ${user.profit || 0}
+              </p>
+            </div>
+          `).join('');
+
+          resultDiv.innerHTML = `<div class="result success"><h4>🏆 Top 3 (${period})</h4>${cards}</div>`;
+        } else {
+          resultDiv.innerHTML = `<div class="result info">ℹ️ 리더보드 데이터가 없습니다.</div>`;
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `<div class="result error">❌ ${error.message}</div>`;
+      }
+    }
+
+    async function getLeaderboard() {
+      const period = document.getElementById('leaderboardPeriod').value;
+      const resultDiv = document.getElementById('leaderboardResult');
+      resultDiv.innerHTML = '<p>로딩 중...</p>';
+
+      try {
+        const response = await fetch(`/api/v1/leaderboard?period=${period}&page=1&limit=20`);
+        const data = await response.json();
+
+        if (response.ok && data.leaderboard && data.leaderboard.length > 0) {
+          const rows = data.leaderboard.map(user => `
+            <tr>
+              <td><strong>${user.rank}</strong></td>
+              <td>${user.x_handle || user.channel_title || 'Unknown'}</td>
+              <td><strong>${user.total_current?.toLocaleString() || 0}</strong></td>
+              <td>${user.contents || 0}</td>
+              <td>${user.mgm || 0}</td>
+              <td>${user.event || 0}</td>
+            </tr>
+          `).join('');
+
+          resultDiv.innerHTML = `
+            <div class="result success">
+              <h4>📊 전체 리더보드 (총 ${data.total}명)</h4>
+              <table>
+                <thead>
+                  <tr>
+                    <th>순위</th>
+                    <th>사용자</th>
+                    <th>총 포인트</th>
+                    <th>컨텐츠</th>
+                    <th>MGM</th>
+                    <th>이벤트</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${rows}
+                </tbody>
+              </table>
+            </div>
+          `;
+        } else {
+          resultDiv.innerHTML = `<div class="result info">ℹ️ 리더보드 데이터가 없습니다.</div>`;
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `<div class="result error">❌ ${error.message}</div>`;
+      }
+    }
+
+    async function getMyRank() {
+      const period = document.getElementById('leaderboardPeriod').value;
+      const resultDiv = document.getElementById('myRankResult');
+      resultDiv.innerHTML = '<p>로딩 중...</p>';
+
+      try {
+        const response = await fetch(`/api/v1/leaderboard/rank/${currentUserId}?period=${period}`);
+        const data = await response.json();
+
+        if (response.ok && data.rank) {
+          resultDiv.innerHTML = `
+            <div class="result success">
+              <h4>👤 내 순위</h4>
+              <p><strong>순위:</strong> ${data.rank}위</p>
+              <p><strong>총 포인트:</strong> ${data.total_current?.toLocaleString() || 0}</p>
+            </div>
+          `;
+        } else {
+          resultDiv.innerHTML = `<div class="result info">ℹ️ 순위 정보가 없습니다.</div>`;
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `<div class="result error">❌ ${error.message}</div>`;
+      }
+    }
+
+    // ========== Referral 관련 함수 ==========
+    async function getMyReferralLink() {
+      const resultDiv = document.getElementById('referralLinkResult');
+      resultDiv.innerHTML = '<p>로딩 중...</p>';
+
+      try {
+        const response = await fetch(`/api/v1/referral/link/${currentUserId}`);
+        const data = await response.json();
+
+        if (response.ok) {
+          resultDiv.innerHTML = `
+            <div class="result success">
+              <h4>🔗 내 추천 링크</h4>
+              <p><strong>추천 코드:</strong> ${data.referralCode}</p>
+              <p><strong>링크:</strong></p>
+              <input type="text" value="${data.link}" readonly style="width: 100%;" onclick="this.select()">
+              <button onclick="navigator.clipboard.writeText('${data.link}')" style="margin-top: 10px;">📋 복사</button>
+            </div>
+          `;
+        } else {
+          throw new Error(data.message || '링크 조회 실패');
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `<div class="result error">❌ ${error.message}</div>`;
+      }
+    }
+
+    async function getReferralStats() {
+      const resultDiv = document.getElementById('referralStatsResult');
+      resultDiv.innerHTML = '<p>로딩 중...</p>';
+
+      try {
+        const response = await fetch(`/api/v1/referral/stats/${currentUserId}`);
+        const data = await response.json();
+
+        if (response.ok) {
+          resultDiv.innerHTML = `
+            <div class="result success">
+              <h4>📊 추천 통계</h4>
+              <table>
+                <tr><td>총 추천 인원</td><td><strong>${data.totalReferrals || 0}</strong>명</td></tr>
+                <tr><td>가입 완료</td><td>${data.joinedCount || 0}명</td></tr>
+                <tr><td>Discord 가입</td><td>${data.discordJoinedCount || 0}명</td></tr>
+                <tr><td>영상 게시 완료</td><td>${data.videoPostedCount || 0}명</td></tr>
+                <tr><td>전체 완료</td><td>${data.completedCount || 0}명</td></tr>
+              </table>
+            </div>
+          `;
+        } else {
+          throw new Error(data.message || '통계 조회 실패');
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `<div class="result error">❌ ${error.message}</div>`;
+      }
+    }
+
+    async function getMyReferrals() {
+      const resultDiv = document.getElementById('myReferralsResult');
+      resultDiv.innerHTML = '<p>로딩 중...</p>';
+
+      try {
+        const response = await fetch(`/api/v1/referral/my-referrals/${currentUserId}`);
+        const data = await response.json();
+
+        if (response.ok && data.referrals && data.referrals.length > 0) {
+          const rows = data.referrals.map(ref => `
+            <tr>
+              <td>${ref.x_handle || 'Unknown'}</td>
+              <td><span class="badge ${ref.is_completed ? 'success' : 'warning'}">${ref.is_completed ? '완료' : '진행중'}</span></td>
+              <td>${ref.is_joined ? '✅' : '❌'}</td>
+              <td>${ref.is_discord_joined ? '✅' : '❌'}</td>
+              <td>${ref.is_video_posted ? '✅' : '❌'}</td>
+              <td>${new Date(ref.created_at).toLocaleDateString()}</td>
+            </tr>
+          `).join('');
+
+          resultDiv.innerHTML = `
+            <div class="result success">
+              <h4>👥 내가 추천한 사람들 (${data.referrals.length}명)</h4>
+              <table>
+                <thead>
+                  <tr>
+                    <th>사용자</th>
+                    <th>상태</th>
+                    <th>가입</th>
+                    <th>Discord</th>
+                    <th>영상</th>
+                    <th>날짜</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${rows}
+                </tbody>
+              </table>
+            </div>
+          `;
+        } else {
+          resultDiv.innerHTML = `<div class="result info">ℹ️ 아직 추천한 사람이 없습니다.</div>`;
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `<div class="result error">❌ ${error.message}</div>`;
+      }
+    }
+
+    async function getXShareUrl() {
+      const resultDiv = document.getElementById('xShareUrlResult');
+      resultDiv.innerHTML = '<p>로딩 중...</p>';
+
+      try {
+        const response = await fetch(`/api/v1/referral/x-share-url/${currentUserId}`);
+        const data = await response.json();
+
+        if (response.ok) {
+          resultDiv.innerHTML = `
+            <div class="result success">
+              <h4>🐦 X 공유 URL</h4>
+              <p><strong>공유 텍스트:</strong></p>
+              <textarea readonly style="width: 100%; height: 80px;">${data.text}</textarea>
+              <p style="margin-top: 10px;"><strong>공유 URL:</strong></p>
+              <input type="text" value="${data.url}" readonly style="width: 100%;" onclick="this.select()">
+              <button onclick="window.open('${data.url}', '_blank')" style="margin-top: 10px;">🐦 X에서 공유하기</button>
+            </div>
+          `;
+        } else {
+          throw new Error(data.message || 'URL 생성 실패');
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `<div class="result error">❌ ${error.message}</div>`;
+      }
+    }
+
+    // ========== NFT 관련 함수 ==========
+    async function getMyNfts() {
+      const resultDiv = document.getElementById('myNftsResult');
+      resultDiv.innerHTML = '<p>로딩 중...</p>';
+
+      try {
+        const response = await fetch(`/api/v1/nft/my-nfts/${currentUserId}`);
+        const data = await response.json();
+
+        if (response.ok && data.nfts && data.nfts.length > 0) {
+          const cards = data.nfts.map(nft => `
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #667eea;">
+              <h4>${nft.name || 'Unknown NFT'}</h4>
+              <p><strong>타입:</strong> <span class="badge primary">${nft.nft_type}</span></p>
+              <p><strong>Tier:</strong> ${nft.tier || '-'}</p>
+              <p><strong>발급일:</strong> ${nft.minted_at ? new Date(nft.minted_at).toLocaleDateString() : '-'}</p>
+              ${nft.is_burned ? '<p><span class="badge danger">소각됨</span></p>' : ''}
+            </div>
+          `).join('');
+
+          resultDiv.innerHTML = `
+            <div class="result success">
+              <h4>🖼️ 내 NFT (${data.nfts.length}개)</h4>
+              ${cards}
+            </div>
+          `;
+        } else {
+          resultDiv.innerHTML = `<div class="result info">ℹ️ 보유 중인 NFT가 없습니다.</div>`;
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `<div class="result error">❌ ${error.message}</div>`;
+      }
+    }
+
+    async function checkUserPassEligibility() {
+      const resultDiv = document.getElementById('userPassEligibilityResult');
+      resultDiv.innerHTML = '<p>로딩 중...</p>';
+
+      try {
+        const response = await fetch(`/api/v1/nft/userpass/eligibility/${currentUserId}`);
+        const data = await response.json();
+
+        if (response.ok) {
+          resultDiv.innerHTML = `
+            <div class="result ${data.eligible ? 'success' : 'warning'}">
+              <h4>${data.eligible ? '✅ 발급 가능' : '❌ 발급 불가'}</h4>
+              <p>${data.message}</p>
+              ${data.reason ? `<p style="margin-top: 10px; font-size: 13px; color: #666;">${data.reason}</p>` : ''}
+            </div>
+          `;
+        } else {
+          throw new Error(data.message || '자격 확인 실패');
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `<div class="result error">❌ ${error.message}</div>`;
+      }
+    }
+
+    async function upgradeTierNft() {
+      const newTier = parseInt(document.getElementById('newTier').value);
+      const resultDiv = document.getElementById('upgradeNftResult');
+      resultDiv.innerHTML = '<p>처리 중...</p>';
+
+      try {
+        const response = await fetch('/api/v1/nft/tier/upgrade', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: currentUserId,
+            newTier
+          })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          resultDiv.innerHTML = `
+            <div class="result success">
+              <h4>✅ Tier ${newTier}로 업그레이드 성공!</h4>
+              <p>${data.message}</p>
+            </div>
+          `;
+          // NFT 목록 자동 갱신
+          getMyNfts();
+        } else {
+          throw new Error(data.message || '업그레이드 실패');
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `<div class="result error">❌ ${error.message}</div>`;
+      }
+    }
+
+    async function getNftBenefits() {
+      const resultDiv = document.getElementById('nftBenefitsResult');
+      resultDiv.innerHTML = '<p>로딩 중...</p>';
+
+      try {
+        const response = await fetch(`/api/v1/nft/benefits/${currentUserId}`);
+        const data = await response.json();
+
+        if (response.ok) {
+          resultDiv.innerHTML = `
+            <div class="result success">
+              <h4>🎁 NFT 혜택</h4>
+              <p><strong>포인트 부스트:</strong> ${data.pointBoost || 0}%</p>
+              <p><strong>기타 혜택:</strong></p>
+              <pre style="background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto;">${JSON.stringify(data, null, 2)}</pre>
+            </div>
+          `;
+        } else {
+          throw new Error(data.message || '혜택 조회 실패');
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `<div class="result error">❌ ${error.message}</div>`;
+      }
+    }
+
+    // ========== Tutorial 관련 함수 ==========
+    async function getTutorialStatus() {
+      const resultDiv = document.getElementById('tutorialStatusResult');
+      resultDiv.innerHTML = '<p>로딩 중...</p>';
+
+      try {
+        const response = await fetch(`/api/v1/tutorial/status/${currentUserId}`);
+        const data = await response.json();
+
+        if (response.ok) {
+          resultDiv.innerHTML = `
+            <div class="result ${data.hasCompleted ? 'success' : 'info'}">
+              <h4>${data.hasCompleted ? '✅ 튜토리얼 완료' : 'ℹ️ 튜토리얼 미완료'}</h4>
+              ${data.completedAt ? `<p>완료일: ${new Date(data.completedAt).toLocaleString()}</p>` : ''}
+              ${data.skippedAt ? `<p>스킵일: ${new Date(data.skippedAt).toLocaleString()}</p>` : ''}
+            </div>
+          `;
+        } else {
+          throw new Error(data.message || '상태 조회 실패');
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `<div class="result error">❌ ${error.message}</div>`;
+      }
+    }
+
+    async function completeTutorial(action) {
+      const resultDiv = document.getElementById('tutorialActionResult');
+      resultDiv.innerHTML = '<p>처리 중...</p>';
+
+      try {
+        const response = await fetch(`/api/v1/tutorial/${action}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: currentUserId })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          resultDiv.innerHTML = `
+            <div class="result success">
+              ✅ 튜토리얼 ${action === 'complete' ? '완료' : '스킵'} 처리되었습니다!
+            </div>
+          `;
+          // 상태 자동 갱신
+          getTutorialStatus();
+        } else {
+          throw new Error(data.message || '처리 실패');
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `<div class="result error">❌ ${error.message}</div>`;
+      }
+    }
+
+    // ========== FAQ 관련 함수 ==========
+    async function getFaqs() {
+      const resultDiv = document.getElementById('faqsResult');
+      resultDiv.innerHTML = '<p>로딩 중...</p>';
+
+      try {
+        const response = await fetch('/api/v1/faq?lang=ko');
+        const data = await response.json();
+
+        if (response.ok && data.faqs && data.faqs.length > 0) {
+          const items = data.faqs.map(faq => `
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 10px 0;">
+              <h4>Q. ${faq.question_ko}</h4>
+              <p style="margin-top: 10px; color: #666;">A. ${faq.answer_ko}</p>
+              ${faq.category ? `<span class="badge primary" style="margin-top: 10px; display: inline-block;">${faq.category}</span>` : ''}
+            </div>
+          `).join('');
+
+          resultDiv.innerHTML = `
+            <div class="result success">
+              <h4>📋 FAQ 목록 (${data.faqs.length}개)</h4>
+              ${items}
+            </div>
+          `;
+        } else {
+          resultDiv.innerHTML = `<div class="result info">ℹ️ FAQ가 없습니다.</div>`;
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `<div class="result error">❌ ${error.message}</div>`;
+      }
+    }
+
+    async function getFaqCategories() {
+      const resultDiv = document.getElementById('faqCategoriesResult');
+      resultDiv.innerHTML = '<p>로딩 중...</p>';
+
+      try {
+        const response = await fetch('/api/v1/faq/categories');
+        const data = await response.json();
+
+        if (response.ok && data.categories && data.categories.length > 0) {
+          const badges = data.categories.map(cat => `
+            <span class="badge primary" style="margin: 5px;">${cat.category} (${cat.count})</span>
+          `).join('');
+
+          resultDiv.innerHTML = `
+            <div class="result success">
+              <h4>📂 FAQ 카테고리</h4>
+              <div style="margin-top: 10px;">${badges}</div>
+            </div>
+          `;
+        } else {
+          resultDiv.innerHTML = `<div class="result info">ℹ️ 카테고리가 없습니다.</div>`;
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `<div class="result error">❌ ${error.message}</div>`;
+      }
+    }
+
+    // 페이지 로드 시 실행
+    window.addEventListener('DOMContentLoaded', () => {
+      console.log('🚀 XYLO Backend Test Dashboard loaded');
+    });
+  </script>
+</body>
+</html>

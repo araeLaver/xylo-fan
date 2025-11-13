@@ -1,0 +1,120 @@
+name: CD
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./backend
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Extract version from tag
+      id: version
+      run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 18.x
+        cache: 'npm'
+        cache-dependency-path: './backend/package-lock.json'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Generate Prisma Client
+      run: npx prisma generate
+
+    - name: Build application
+      run: npm run build
+
+    - name: Run tests
+      run: npm run test --if-present
+      continue-on-error: false
+
+    - name: Create deployment package
+      run: |
+        mkdir -p deploy
+        cp -r dist deploy/
+        cp -r node_modules deploy/
+        cp -r prisma deploy/
+        cp package.json deploy/
+        cp package-lock.json deploy/
+        cd deploy
+        tar -czf ../backend-${{ steps.version.outputs.VERSION }}.tar.gz .
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          backend/backend-${{ steps.version.outputs.VERSION }}.tar.gz
+        draft: false
+        prerelease: false
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Deployment summary
+      run: |
+        echo "## Deployment Summary :rocket:" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "- **Version**: ${{ steps.version.outputs.VERSION }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Deployed at**: $(date -u)" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Next Steps" >> $GITHUB_STEP_SUMMARY
+        echo "1. Download the deployment package from GitHub Releases" >> $GITHUB_STEP_SUMMARY
+        echo "2. Upload to Koyeb or your deployment platform" >> $GITHUB_STEP_SUMMARY
+        echo "3. Configure environment variables" >> $GITHUB_STEP_SUMMARY
+        echo "4. Run database migrations if needed" >> $GITHUB_STEP_SUMMARY
+        echo "5. Verify the deployment" >> $GITHUB_STEP_SUMMARY
+
+  # Docker build job (optional, for future use)
+  docker-build:
+    runs-on: ubuntu-latest
+    if: false  # Disabled for now, enable when ready
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Extract version from tag
+      id: version
+      run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./backend
+        push: true
+        tags: |
+          ${{ secrets.DOCKER_USERNAME }}/xylo-backend:${{ steps.version.outputs.VERSION }}
+          ${{ secrets.DOCKER_USERNAME }}/xylo-backend:latest
+        cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/xylo-backend:buildcache
+        cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/xylo-backend:buildcache,mode=max
+
+    - name: Docker build summary
+      run: |
+        echo "## Docker Build :whale:" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "✅ Docker image built and pushed successfully" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "- **Image**: ${{ secrets.DOCKER_USERNAME }}/xylo-backend:${{ steps.version.outputs.VERSION }}" >> $GITHUB_STEP_SUMMARY

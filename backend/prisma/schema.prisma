@@ -1,0 +1,536 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model event_participations {
+  id              String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id         String     @db.Uuid
+  event_type      event_type
+  event_id        String     @db.VarChar(255)
+  event_name      String?    @db.VarChar(255)
+  vote_weight     Int?
+  submission_url  String?
+  is_winner       Boolean?   @default(false)
+  prize           String?    @db.VarChar(255)
+  participated_at DateTime   @default(now()) @db.Timestamptz(6)
+  created_at      DateTime   @default(now()) @db.Timestamptz(6)
+  users           users      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([event_id], map: "idx_events_id")
+  @@index([event_type], map: "idx_events_type")
+  @@index([user_id], map: "idx_events_user")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model leaderboard_entries {
+  id                String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id           String             @db.Uuid
+  channel_id        String?            @db.Uuid
+  period            leaderboard_period
+  rank              Int
+  total_current     Int
+  contents          Int
+  mgm               Int
+  event             Int
+  profit            Int
+  boost             Int
+  channel_title     String?            @db.VarChar(255)
+  channel_image_url String?
+  x_handle          String?            @db.VarChar(255)
+  profile_image_url String?
+  snapshot_date     DateTime           @db.Date
+  created_at        DateTime           @default(now()) @db.Timestamptz(6)
+  youtube_channels  youtube_channels?  @relation(fields: [channel_id], references: [id], onUpdate: NoAction)
+  users             users              @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([period, rank, snapshot_date])
+  @@index([channel_id], map: "idx_leaderboard_channel")
+  @@index([period, rank], map: "idx_leaderboard_period")
+  @@index([snapshot_date(sort: Desc)], map: "idx_leaderboard_snapshot")
+  @@index([user_id], map: "idx_leaderboard_user")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model point_history {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id    String   @db.Uuid
+  date       DateTime @db.Date
+  day_total  Int      @default(0)
+  contents   Int      @default(0)
+  referral   Int      @default(0)
+  event      Int      @default(0)
+  profit     Int      @default(0)
+  boost      Int      @default(0)
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  users      users    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([user_id, date])
+  @@index([date(sort: Desc)], map: "idx_point_history_date")
+  @@index([user_id, date(sort: Desc)], map: "idx_point_history_user")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model point_transactions {
+  id         String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id    String         @db.Uuid
+  category   point_category
+  amount     Int
+  reason     String?
+  metadata   Json?
+  created_at DateTime       @default(now()) @db.Timestamptz(6)
+  users      users          @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([category], map: "idx_point_tx_category")
+  @@index([created_at(sort: Desc)], map: "idx_point_tx_created")
+  @@index([user_id, created_at(sort: Desc)], map: "idx_point_tx_user")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model referrals {
+  id                                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  referrer_id                        String    @db.Uuid
+  referee_id                         String    @db.Uuid
+  referral_code                      String    @db.VarChar(20)
+  is_joined                          Boolean?  @default(false)
+  is_discord_joined                  Boolean?  @default(false)
+  is_video_posted                    Boolean?  @default(false)
+  is_completed                       Boolean?  @default(false)
+  completed_at                       DateTime? @db.Timestamptz(6)
+  created_at                         DateTime  @default(now()) @db.Timestamptz(6)
+  users_referrals_referee_idTousers  users     @relation("referrals_referee_idTousers", fields: [referee_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users_referrals_referrer_idTousers users     @relation("referrals_referrer_idTousers", fields: [referrer_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([referrer_id, referee_id])
+  @@index([referral_code], map: "idx_referrals_code")
+  @@index([is_completed], map: "idx_referrals_completed")
+  @@index([referee_id], map: "idx_referrals_referee")
+  @@index([referrer_id], map: "idx_referrals_referrer")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model social_accounts {
+  id            String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id       String          @db.Uuid
+  platform      social_platform
+  account_id    String          @db.VarChar(255)
+  handle        String?         @db.VarChar(255)
+  display_name  String?         @db.VarChar(255)
+  profile_image String?
+  is_verified   Boolean?        @default(false)
+  is_primary    Boolean?        @default(false)
+  connected_at  DateTime        @default(now()) @db.Timestamptz(6)
+  created_at    DateTime        @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime        @default(now()) @db.Timestamptz(6)
+  users         users           @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([user_id, platform, account_id])
+  @@index([platform], map: "idx_social_accounts_platform")
+  @@index([user_id], map: "idx_social_accounts_user_id")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model system_configs {
+  key         String   @id @db.VarChar(255)
+  value       Json
+  description String?
+  updated_at  DateTime @default(now()) @db.Timestamptz(6)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model user_nfts {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id          String    @db.Uuid
+  nft_type         nft_type
+  token_id         BigInt?
+  contract_address String?   @db.VarChar(42)
+  chain_id         Int?      @default(80001)
+  name             String?   @db.VarChar(255)
+  description      String?
+  image_url        String?
+  tier             Int?
+  metadata         Json?
+  is_burned        Boolean?  @default(false)
+  burned_at        DateTime? @db.Timestamptz(6)
+  minted_at        DateTime? @db.Timestamptz(6)
+  created_at       DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime  @default(now()) @db.Timestamptz(6)
+  users            users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([contract_address, token_id], map: "idx_user_nfts_token")
+  @@index([nft_type], map: "idx_user_nfts_type")
+  @@index([user_id], map: "idx_user_nfts_user")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model user_points {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id         String   @unique @db.Uuid
+  total_points    Int      @default(0)
+  slot_01_content Int      @default(0)
+  slot_02_mgm     Int      @default(0)
+  slot_03_event   Int      @default(0)
+  slot_04_profit  Int      @default(0)
+  slot_05_sponsor Int      @default(0)
+  slot_06_boost   Int      @default(0)
+  sbt_value       Int      @default(0)
+  last_calculated DateTime @default(now()) @db.Timestamptz(6)
+  created_at      DateTime @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime @default(now()) @db.Timestamptz(6)
+  users           users    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([sbt_value(sort: Desc)], map: "idx_user_points_sbt")
+  @@index([total_points(sort: Desc)], map: "idx_user_points_total")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model users {
+  id                                     String                         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  x_id                                   String?                        @unique @db.VarChar(255)
+  x_handle                               String?                        @db.VarChar(255)
+  x_display_name                         String?                        @db.VarChar(255)
+  email                                  String?                        @unique @db.VarChar(255)
+  email_verified                         Boolean?                       @default(false)
+  wallet_address                         String?                        @unique @db.VarChar(42)
+  profile_image_url                      String?
+  referral_code                          String                         @unique @db.VarChar(20)
+  joined_at                              DateTime                       @default(now()) @db.Timestamptz(6)
+  created_at                             DateTime                       @default(now()) @db.Timestamptz(6)
+  updated_at                             DateTime                       @default(now()) @db.Timestamptz(6)
+  primary_platform                       social_platform                @default(X)
+  has_completed_tutorial                 Boolean?                       @default(false)
+  tutorial_completed_at                  DateTime?                      @db.Timestamptz(6)
+  tutorial_skipped_at                    DateTime?                      @db.Timestamptz(6)
+  channel_verification_history           channel_verification_history[]
+  event_participations                   event_participations[]
+  leaderboard_entries                    leaderboard_entries[]
+  point_history                          point_history[]
+  point_transactions                     point_transactions[]
+  referrals_referrals_referee_idTousers  referrals[]                    @relation("referrals_referee_idTousers")
+  referrals_referrals_referrer_idTousers referrals[]                    @relation("referrals_referrer_idTousers")
+  social_accounts                        social_accounts[]
+  user_nfts                              user_nfts[]
+  user_points                            user_points?
+  x_post_queue                           x_post_queue[]
+  x_posted_content                       x_posted_content[]
+  xlt_claim_requests                     xlt_claim_requests[]
+  youtube_channels                       youtube_channels[]
+
+  @@index([primary_platform], map: "idx_users_primary_platform")
+  @@index([has_completed_tutorial], map: "idx_users_tutorial_completed")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model youtube_channels {
+  id                      String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id                 String                    @db.Uuid
+  channel_id              String                    @unique @db.VarChar(255)
+  channel_url             String
+  channel_title           String?                   @db.VarChar(255)
+  channel_description     String?
+  thumbnail_url           String?
+  subscriber_count        Int?                      @default(0)
+  video_count             Int?                      @default(0)
+  view_count              BigInt?                   @default(0)
+  verification_code       String?                   @unique @db.VarChar(50)
+  is_verified             Boolean?                  @default(false)
+  verified_at             DateTime?                 @db.Timestamptz(6)
+  created_at              DateTime                  @default(now()) @db.Timestamptz(6)
+  updated_at              DateTime                  @default(now()) @db.Timestamptz(6)
+  first_registered_at     DateTime?                 @db.Timestamp(6)
+  verification_attempts   Int?                      @default(0)
+  channel_daily_snapshots channel_daily_snapshots[]
+  leaderboard_entries     leaderboard_entries[]
+  x_post_queue            x_post_queue[]
+  users                   users                     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  youtube_videos          youtube_videos[]
+
+  @@index([user_id], map: "idx_youtube_channels_user_id")
+  @@index([is_verified], map: "idx_youtube_channels_verified")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model youtube_video_snapshots {
+  id             String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  video_id       String         @db.Uuid
+  snapshot_date  DateTime       @db.Date
+  view_count     Int?           @default(0)
+  like_count     Int?           @default(0)
+  comment_count  Int?           @default(0)
+  created_at     DateTime       @default(now()) @db.Timestamptz(6)
+  youtube_videos youtube_videos @relation(fields: [video_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([video_id, snapshot_date])
+  @@index([snapshot_date(sort: Desc)], map: "idx_youtube_snapshots_date")
+  @@index([video_id], map: "idx_youtube_snapshots_video")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model youtube_videos {
+  id                       String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  channel_id               String                    @db.Uuid
+  video_id                 String                    @unique @db.VarChar(255)
+  title                    String?                   @db.VarChar(500)
+  description              String?
+  thumbnail_url            String?
+  published_at             DateTime?                 @db.Timestamptz(6)
+  duration                 Int?
+  view_count               Int?                      @default(0)
+  like_count               Int?                      @default(0)
+  comment_count            Int?                      @default(0)
+  tags                     String[]
+  is_shorts                Boolean?                  @default(false)
+  is_eligible              Boolean?                  @default(false)
+  created_at               DateTime                  @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime                  @default(now()) @db.Timestamptz(6)
+  is_posted_to_x           Boolean?                  @default(false)
+  category_id              String?                   @db.VarChar(10)
+  default_language         String?                   @db.VarChar(10)
+  default_audio_language   String?                   @db.VarChar(10)
+  thumbnail_medium_url     String?
+  thumbnail_high_url       String?
+  thumbnail_standard_url   String?
+  thumbnail_maxres_url     String?
+  channel_title            String?                   @db.VarChar(255)
+  live_broadcast_content   String?                   @db.VarChar(20)
+  definition               String?                   @db.VarChar(10)
+  dimension                String?                   @db.VarChar(10)
+  has_caption              Boolean?                  @default(false)
+  is_licensed_content      Boolean?                  @default(false)
+  projection               String?                   @db.VarChar(20)
+  privacy_status           String?                   @db.VarChar(20)
+  upload_status            String?                   @db.VarChar(20)
+  is_embeddable            Boolean?                  @default(true)
+  license                  String?                   @db.VarChar(20)
+  is_made_for_kids         Boolean?                  @default(false)
+  is_public_stats_viewable Boolean?                  @default(true)
+  x_post_queue             x_post_queue?
+  x_posted_content         x_posted_content[]
+  youtube_video_snapshots  youtube_video_snapshots[]
+  youtube_channels         youtube_channels          @relation(fields: [channel_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([channel_id], map: "idx_youtube_videos_channel_id")
+  @@index([published_at(sort: Desc)], map: "idx_youtube_videos_published")
+  @@index([tags], map: "idx_youtube_videos_tags", type: Gin)
+  @@index([is_posted_to_x], map: "idx_youtube_videos_is_posted_to_x")
+  @@index([category_id], map: "idx_youtube_videos_category_id")
+  @@index([privacy_status], map: "idx_youtube_videos_privacy_status")
+  @@index([upload_status], map: "idx_youtube_videos_upload_status")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model channel_daily_snapshots {
+  id               String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  channel_id       String           @db.Uuid
+  snapshot_date    DateTime         @db.Date
+  subscriber_count Int?             @default(0)
+  video_count      Int?             @default(0)
+  view_count       BigInt?          @default(0)
+  rank             Int?
+  created_at       DateTime         @default(now()) @db.Timestamptz(6)
+  youtube_channels youtube_channels @relation(fields: [channel_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([channel_id, snapshot_date])
+  @@index([channel_id], map: "idx_channel_snapshots_channel")
+  @@index([snapshot_date(sort: Desc)], map: "idx_channel_snapshots_date")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model channel_verification_history {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  channel_id        String   @db.VarChar(255)
+  user_id           String   @db.Uuid
+  verification_code String   @db.VarChar(8)
+  action_type       String   @db.VarChar(50)
+  metadata          Json?
+  created_at        DateTime @default(now()) @db.Timestamp(6)
+  users             users    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_verification_user")
+
+  @@index([action_type], map: "idx_verification_history_action_type")
+  @@index([channel_id], map: "idx_verification_history_channel_id")
+  @@index([created_at(sort: Desc)], map: "idx_verification_history_created_at")
+  @@index([user_id], map: "idx_verification_history_user_id")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model x_post_queue {
+  id               String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  video_id         String             @unique(map: "uq_post_queue_video") @db.Uuid
+  user_id          String             @db.Uuid
+  channel_id       String             @db.Uuid
+  post_text        String
+  media_url        String?
+  scheduled_at     DateTime           @default(now()) @db.Timestamp(6)
+  posted_at        DateTime?          @db.Timestamp(6)
+  status           post_status        @default(PENDING)
+  retry_count      Int?               @default(0)
+  max_retries      Int?               @default(3)
+  error_message    String?
+  last_error_at    DateTime?          @db.Timestamp(6)
+  metadata         Json?
+  created_at       DateTime           @default(now()) @db.Timestamp(6)
+  updated_at       DateTime           @default(now()) @db.Timestamp(6)
+  youtube_channels youtube_channels   @relation(fields: [channel_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_post_queue_channel")
+  users            users              @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_post_queue_user")
+  youtube_videos   youtube_videos     @relation(fields: [video_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_post_queue_video")
+  x_posted_content x_posted_content[]
+
+  @@index([created_at(sort: Desc)], map: "idx_post_queue_created_at")
+  @@index([scheduled_at], map: "idx_post_queue_scheduled_at")
+  @@index([status], map: "idx_post_queue_status")
+  @@index([user_id], map: "idx_post_queue_user_id")
+  @@index([video_id], map: "idx_post_queue_video_id")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model x_posted_content {
+  id               String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  queue_id         String         @db.Uuid
+  video_id         String         @db.Uuid
+  user_id          String         @db.Uuid
+  x_post_id        String?        @unique @db.VarChar(255)
+  x_post_url       String?
+  post_text        String
+  like_count       Int?           @default(0)
+  retweet_count    Int?           @default(0)
+  reply_count      Int?           @default(0)
+  impression_count Int?           @default(0)
+  posted_at        DateTime       @default(now()) @db.Timestamp(6)
+  stats_updated_at DateTime?      @db.Timestamp(6)
+  metadata         Json?
+  x_post_queue     x_post_queue   @relation(fields: [queue_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_posted_content_queue")
+  users            users          @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_posted_content_user")
+  youtube_videos   youtube_videos @relation(fields: [video_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_posted_content_video")
+
+  @@index([posted_at(sort: Desc)], map: "idx_posted_content_posted_at")
+  @@index([user_id], map: "idx_posted_content_user_id")
+  @@index([video_id], map: "idx_posted_content_video_id")
+  @@index([x_post_id], map: "idx_posted_content_x_post_id")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model email_verification_codes {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email      String    @db.VarChar(255)
+  code       String    @db.VarChar(6)
+  expires_at DateTime  @db.Timestamptz(6)
+  is_used    Boolean?  @default(false)
+  used_at    DateTime? @db.Timestamptz(6)
+  ip_address String?   @db.VarChar(45)
+  user_agent String?
+  attempts   Int?      @default(0)
+  created_at DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at DateTime  @default(now()) @db.Timestamptz(6)
+
+  @@index([created_at], map: "idx_email_verification_created")
+  @@index([email], map: "idx_email_verification_email")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
+model faqs {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  question_ko  String
+  question_en  String
+  answer_ko    String
+  answer_en    String
+  category     String?  @default("General") @db.VarChar(50)
+  order_index  Int?     @default(0)
+  is_published Boolean? @default(true)
+  view_count   Int?     @default(0)
+  is_pinned    Boolean? @default(false)
+  created_at   DateTime @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([category], map: "idx_faqs_category")
+  @@index([order_index], map: "idx_faqs_order")
+  @@index([is_pinned, order_index], map: "idx_faqs_pinned")
+  @@index([is_published], map: "idx_faqs_published")
+}
+
+/// This enum is commented in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+enum event_type {
+  VOTE
+  CONTEST
+  COMMUNITY
+}
+
+/// This enum is commented in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+enum leaderboard_period {
+  ALL
+  ONE_DAY      @map("1D")
+  ONE_WEEK     @map("1W")
+  ONE_MONTH    @map("1M")
+  THREE_MONTHS @map("3M")
+}
+
+/// This enum is commented in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+enum nft_type {
+  SBT
+  TIER
+  REWARD
+  CONNECTION
+}
+
+/// This enum is commented in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+enum point_category {
+  CONTENT
+  REFERRAL
+  EVENT
+  PROFIT
+  BOOST
+}
+
+/// This enum is commented in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+enum social_platform {
+  X
+  YOUTUBE
+  INSTAGRAM
+  DISCORD
+}
+
+enum post_status {
+  PENDING
+  PROCESSING
+  POSTED
+  FAILED
+  CANCELLED
+}
+
+/// XLT Claim 상태
+enum xlt_claim_status {
+  PENDING    // 신청 완료 (승인 대기)
+  APPROVED   // 승인 완료
+  REJECTED   // 거부됨
+  COMPLETED  // XLT 지급 완료
+  CANCELLED  // 신청 취소
+}
+
+/// XLT Claim 신청 내역
+model xlt_claim_requests {
+  id             String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id        String           @db.Uuid
+  points_claimed Int              // 신청한 포인트 수량
+  xlt_amount     Decimal          @db.Decimal(20, 8) // 예상 XLT 수량
+  wallet_address String           @db.VarChar(255) // XLT 수령 지갑 주소
+  status         xlt_claim_status @default(PENDING)
+  memo           String?          // 신청 메모
+  rejection_reason String?        // 거부 사유
+  approved_at    DateTime?        @db.Timestamptz(6)
+  completed_at   DateTime?        @db.Timestamptz(6)
+  created_at     DateTime         @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime         @default(now()) @updatedAt @db.Timestamptz(6)
+  users          users            @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([user_id], map: "idx_xlt_claims_user")
+  @@index([status], map: "idx_xlt_claims_status")
+  @@index([created_at], map: "idx_xlt_claims_created")
+}
