@@ -40,23 +40,182 @@ K-POP 팬덤 기반 RWA 블록체인 플랫폼
 
 ```
 xylo-fan/
-├── backend/              # NestJS Backend
+├── backend/                              # NestJS Backend
 │   ├── src/
-│   │   ├── auth/         # 인증
-│   │   ├── users/        # 사용자 관리
-│   │   ├── youtube/      # 유튜브 연동
-│   │   ├── points/       # 포인트 시스템
-│   │   ├── leaderboard/  # 리더보드
-│   │   ├── referral/     # 추천 시스템
-│   │   ├── nft/          # NFT 관리
-│   │   └── jobs/         # Queue Jobs
-│   └── prisma/
-│       └── schema.prisma
+│   │   ├── auth/                         # 인증 모듈
+│   │   │   ├── strategies/               # Passport 전략
+│   │   │   │   ├── jwt.strategy.ts       # JWT 인증
+│   │   │   │   ├── twitter.strategy.ts   # Twitter OAuth 1.0a
+│   │   │   │   └── discord.strategy.ts   # Discord OAuth
+│   │   │   ├── guards/                   # 인증 가드
+│   │   │   ├── email/                    # 이메일 서비스
+│   │   │   ├── dto/                      # DTO (인증 관련)
+│   │   │   ├── auth.controller.ts
+│   │   │   ├── auth.service.ts
+│   │   │   └── auth.module.ts
+│   │   │
+│   │   ├── users/                        # 사용자 관리
+│   │   │   ├── dto/                      # DTO (사용자 관련)
+│   │   │   ├── users.controller.ts
+│   │   │   ├── users.service.ts
+│   │   │   └── users.module.ts
+│   │   │
+│   │   ├── youtube/                      # 유튜브 연동
+│   │   │   ├── dto/
+│   │   │   ├── youtube.controller.ts
+│   │   │   ├── youtube.service.ts        # YouTube Data API v3
+│   │   │   └── youtube.module.ts
+│   │   │
+│   │   ├── points/                       # 포인트 시스템
+│   │   │   ├── dto/
+│   │   │   ├── points.controller.ts
+│   │   │   ├── points.service.ts         # 6-slot 포인트 관리
+│   │   │   └── points.module.ts
+│   │   │
+│   │   ├── leaderboard/                  # 리더보드
+│   │   │   ├── dto/
+│   │   │   ├── leaderboard.controller.ts
+│   │   │   ├── leaderboard.service.ts
+│   │   │   └── leaderboard.module.ts
+│   │   │
+│   │   ├── referral/                     # 추천 시스템
+│   │   │   ├── dto/
+│   │   │   ├── referral.controller.ts
+│   │   │   ├── referral.service.ts       # 3단계 추천 추적
+│   │   │   └── referral.module.ts
+│   │   │
+│   │   ├── nft/                          # NFT 관리
+│   │   │   ├── dto/
+│   │   │   ├── enums/                    # NFT 타입 정의
+│   │   │   ├── constants/                # NFT 메타데이터
+│   │   │   ├── nft.controller.ts
+│   │   │   ├── nft.service.ts
+│   │   │   └── nft.module.ts
+│   │   │
+│   │   ├── events/                       # 이벤트 참여
+│   │   │   ├── dto/
+│   │   │   ├── events.controller.ts
+│   │   │   ├── events.service.ts
+│   │   │   └── events.module.ts
+│   │   │
+│   │   ├── tutorial/                     # 튜토리얼
+│   │   │   ├── constants/                # 튜토리얼 카드 데이터
+│   │   │   ├── dto/
+│   │   │   ├── tutorial.controller.ts
+│   │   │   ├── tutorial.service.ts
+│   │   │   └── tutorial.module.ts
+│   │   │
+│   │   ├── faq/                          # FAQ
+│   │   │   ├── dto/
+│   │   │   ├── guards/                   # 관리자 가드
+│   │   │   ├── faq.controller.ts
+│   │   │   ├── admin-faq.controller.ts
+│   │   │   ├── faq.service.ts
+│   │   │   └── faq.module.ts
+│   │   │
+│   │   ├── xlt-claim/                    # XLT 클레임
+│   │   │   ├── dto/
+│   │   │   ├── constants/
+│   │   │   ├── xlt-claim.controller.ts
+│   │   │   ├── xlt-claim.service.ts
+│   │   │   └── xlt-claim.module.ts
+│   │   │
+│   │   ├── jobs/                         # Queue Jobs (Bull)
+│   │   │   ├── processors/
+│   │   │   │   ├── youtube-crawl.processor.ts
+│   │   │   │   ├── point-calculation.processor.ts
+│   │   │   │   ├── leaderboard-snapshot.processor.ts
+│   │   │   │   ├── referral.processor.ts
+│   │   │   │   └── tier-nft-upgrade.processor.ts
+│   │   │   ├── jobs.service.ts
+│   │   │   └── jobs.module.ts
+│   │   │
+│   │   ├── prisma/                       # Prisma ORM
+│   │   │   ├── prisma.service.ts
+│   │   │   └── prisma.module.ts
+│   │   │
+│   │   ├── test/                         # 테스트용 모듈
+│   │   │   ├── templates/                # HTML 템플릿
+│   │   │   ├── test.controller.ts
+│   │   │   ├── test.service.ts
+│   │   │   └── test.module.ts
+│   │   │
+│   │   ├── app.module.ts                 # 루트 모듈
+│   │   ├── app.controller.ts
+│   │   ├── app.service.ts
+│   │   └── main.ts                       # 애플리케이션 진입점
+│   │
+│   ├── prisma/
+│   │   └── schema.prisma                 # 데이터베이스 스키마
+│   │
+│   ├── test/                             # E2E 테스트
+│   │   ├── app.e2e-spec.ts
+│   │   └── jest-e2e.json
+│   │
+│   ├── package.json
+│   ├── tsconfig.json
+│   ├── nest-cli.json
+│   ├── .env.example                      # 환경변수 템플릿
+│   ├── .prettierrc                       # Prettier 설정
+│   ├── eslint.config.mjs                 # ESLint 설정
+│   └── README.md
 │
-├── frontend/             # React (예정)
-├── blockchain/           # Smart Contracts (예정)
-├── database/             # DB Migrations
-└── docs/                 # 문서
+├── database/                             # 데이터베이스 마이그레이션
+│   ├── 01-create-tables.sql             # 기본 테이블 생성
+│   ├── 02-add-channel-snapshots.sql     # 채널 스냅샷
+│   ├── 03-optional-improvements.sql     # 선택적 개선
+│   ├── 04-multi-sns-support.sql         # 멀티 SNS 지원
+│   ├── 05-verification-and-posting.sql  # 인증 및 포스팅
+│   ├── 06-youtube-extended-fields.sql   # 유튜브 확장 필드
+│   ├── 07-email-verification.sql        # 이메일 인증
+│   ├── 08-tutorial-tracking.sql         # 튜토리얼 추적
+│   ├── 09-faq-system.sql                # FAQ 시스템
+│   ├── 10-update-point-category-enum.sql
+│   ├── 11-xlt-claim-requests.sql        # XLT 클레임
+│   ├── run-migration.js                 # 마이그레이션 실행 스크립트
+│   ├── verify-tables.js                 # 테이블 검증
+│   ├── ERD.md                            # ERD 문서
+│   └── DATABASE-SETUP-RESULT.md
+│
+├── docs/                                 # 프로젝트 문서
+│   ├── 00-BACKEND-QUICK-REFERENCE.md    # 백엔드 빠른 참조
+│   ├── 00-BUSINESS-REQUIREMENTS.md      # 비즈니스 요구사항
+│   ├── 01-TECH-STACK.md                 # 기술 스택
+│   ├── 02-DATABASE-SCHEMA.md            # 데이터베이스 스키마
+│   ├── 03-API-DESIGN.md                 # API 설계
+│   ├── 04-SMART-CONTRACT-DESIGN.md      # 스마트 컨트랙트 설계
+│   ├── 05-SYSTEM-ARCHITECTURE.md        # 시스템 아키텍처
+│   ├── 06-DEVELOPMENT-SETUP.md          # 개발 환경 설정
+│   ├── 07-CODING-GUIDELINES.md          # 코딩 가이드라인
+│   ├── 08-DEPLOYMENT-STRATEGY.md        # 배포 전략
+│   ├── 09-BACKEND-LOGIC-SPEC.md         # 백엔드 로직 상세
+│   ├── 10-EXTERNAL-API-INTEGRATION.md   # 외부 API 연동
+│   ├── 11-QUEUE-JOBS-SPEC.md            # Queue Jobs 스펙
+│   ├── 12-MULTI-SNS-MIGRATION-GUIDE.md
+│   ├── 13-IMPLEMENTATION-ROADMAP.md
+│   ├── 14-SCREEN-PLANNING-GAP-ANALYSIS.md
+│   ├── 15-DEVELOPMENT-SCHEDULE.md
+│   ├── 16-WBS-BY-FEATURE.md
+│   ├── 17-BACKEND-WBS-DETAILED.md
+│   ├── feature-specs/                   # 기능 상세 스펙
+│   │   ├── 01-email-recovery.md
+│   │   ├── 02-tutorial-flow.md
+│   │   ├── 02-x-auto-posting.md
+│   │   └── 03-faq-system.md
+│   └── youtube-api-additional-fields.md
+│
+├── frontend/                             # React Frontend (예정)
+│   └── README.md
+│
+├── blockchain/                           # Smart Contracts (예정)
+│   └── README.md
+│
+├── .github/                              # GitHub Actions
+│   └── workflows/
+│       └── ci.yml                        # CI 워크플로우
+│
+├── package.json
+└── README.md
 ```
 
 ---
