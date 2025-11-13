@@ -11,20 +11,18 @@
 
 ---
 
-## 📖 프로젝트 개요
+프로젝트 개요
 
-**XYLO**는 K-POP 아이돌 팬 활동을 블록체인 자산으로 전환하는 Web3 플랫폼입니다.
+핵심 기능
 
-### 핵심 기능
-
-- 🎵 **팬 활동 정량화**: 콘텐츠 확산, 신규 유입, 이벤트 참여 → 포인트 전환
-- 🏆 **실시간 리더보드**: 기여도 기반 순위 시스템 (ALL, 1D, 1W, 1M, 3M)
-- 🎁 **ERC-3525 SBT**: 6개 슬롯 구조로 활동 히스토리 온체인 기록
-- 🖼️ **NFT 시스템**: 티어형, 리워드형, 커넥션형(소각형) NFT
-- 💰 **RWA Vault**: 실물 수익과 직접 연결된 투명 정산
-- 🪙 **XLT 토큰**: MVP 종료 후 SBT 비율에 따라 Claim 가능
-- 🔗 **소셜 통합**: Twitter OAuth 1.0a, YouTube Data API v3 연동
-- 👥 **추천 시스템**: 3단계 추천 추적 (가입, 디스코드, 영상)
+- **팬 활동 정량화**: 콘텐츠 확산, 신규 유입, 이벤트 참여 → 포인트 전환
+- **실시간 리더보드**: 기여도 기반 순위 시스템 (ALL, 1D, 1W, 1M, 3M)
+- **ERC-3525 SBT**: 6개 슬롯 구조로 활동 히스토리 온체인 기록
+- **NFT 시스템**: 티어형, 리워드형, 커넥션형(소각형) NFT
+- **RWA Vault**: 실물 수익과 직접 연결된 투명 정산
+- **XLT 토큰**: MVP 종료 후 SBT 비율에 따라 Claim 가능
+- **소셜 통합**: Twitter OAuth 1.0a, YouTube Data API v3 연동
+- **추천 시스템**: 3단계 추천 추적 (가입, 디스코드, 영상)
 
 ### 대표 IP
 
@@ -33,9 +31,9 @@
 
 ---
 
-## 🏗️ 기술 스택
+## 기술 스택
 
-### Backend (✅ 구현 완료)
+### Backend 
 - **Framework**: NestJS 11.x
 - **Language**: TypeScript 5.7.x
 - **Runtime**: Node.js 18.20.0 LTS
@@ -47,18 +45,8 @@
 - **External APIs**: Google YouTube Data API v3
 
 ### Frontend (🚧 예정)
-- **Framework**: React 18.x
-- **Language**: TypeScript
-- **State**: Zustand
-- **UI**: Material-UI (MUI)
-- **Web3**: ethers.js
 
 ### Blockchain (🚧 예정)
-- **Network**: Polygon Mumbai (테스트넷) / Polygon Mainnet (프로덕션)
-- **Language**: Solidity 0.8.20
-- **Framework**: Hardhat
-- **Library**: ethers.js 6.x
-- **Standards**: ERC-721 (SBT, Tier NFT)
 
 ### Deployment
 - **Backend**: Koyeb (PostgreSQL, Backend Hosting)
@@ -68,7 +56,7 @@
 
 ---
 
-## 📁 프로젝트 구조
+##  프로젝트 구조
 
 ```
 C:\Develop\Creativehill\XYLO\
@@ -187,9 +175,9 @@ C:\Develop\Creativehill\XYLO\
 
 ---
 
-## 🚀 빠른 시작
+## 빠른 시작
 
-### 사전 요구사항
+### 요구사항
 
 - **Node.js**: 18.20.0 LTS
 - **npm**: 10.x
@@ -281,7 +269,7 @@ curl http://localhost:3000
 
 ---
 
-## 🔐 환경변수 설정
+##  환경변수 설정
 
 `backend/.env` 파일을 생성하고 다음 변수들을 설정하세요:
 
@@ -348,7 +336,7 @@ PORT="3000"
 
 ---
 
-## 📊 데이터베이스 스키마
+## 데이터베이스 스키마
 
 ### 14개 테이블 (PostgreSQL 15, Schema: xylo)
 
@@ -373,7 +361,7 @@ PORT="3000"
 
 ---
 
-## 🛠️ 구현된 API 엔드포인트 (27개)
+## API 엔드포인트 (27개)
 
 ### 인증 (Auth) - 5개
 - `GET /api/v1/auth/twitter` - Twitter OAuth 시작
@@ -383,59 +371,59 @@ PORT="3000"
 - `POST /api/v1/auth/login` - 이메일 로그인
 
 ### 사용자 (Users) - 4개
-- `GET /api/v1/users/me` - 내 프로필 조회 🔒
-- `PATCH /api/v1/users/me` - 프로필 업데이트 🔒
-- `POST /api/v1/users/wallet` - 지갑 연결 🔒
-- `GET /api/v1/users/me/channels` - 내 채널 목록 🔒
+- `GET /api/v1/users/me` - 내 프로필 조회 
+- `PATCH /api/v1/users/me` - 프로필 업데이트 
+- `POST /api/v1/users/wallet` - 지갑 연결 
+- `GET /api/v1/users/me/channels` - 내 채널 목록 
 
 ### 유튜브 (YouTube) - 3개
-- `POST /api/v1/youtube/channels` - 채널 등록 🔒
-- `POST /api/v1/youtube/channels/verify` - 채널 인증 🔒
-- `DELETE /api/v1/youtube/channels/:id` - 채널 삭제 🔒
+- `POST /api/v1/youtube/channels` - 채널 등록 
+- `POST /api/v1/youtube/channels/verify` - 채널 인증 
+- `DELETE /api/v1/youtube/channels/:id` - 채널 삭제 
 
 ### 포인트 (Points) - 3개
-- `GET /api/v1/points/my-points` - 현재 포인트 (6-slot) 🔒
-- `GET /api/v1/points/history` - 트랜잭션 히스토리 🔒
-- `GET /api/v1/points/daily?days=30` - 일일 히스토리 🔒
+- `GET /api/v1/points/my-points` - 현재 포인트 (6-slot) 
+- `GET /api/v1/points/history` - 트랜잭션 히스토리 
+- `GET /api/v1/points/daily?days=30` - 일일 히스토리 
 
 ### 리더보드 (Leaderboard) - 2개
-- `GET /api/v1/leaderboard/top-users?type=TOTAL&limit=100` - 리더보드 조회 🔒
-- `GET /api/v1/leaderboard/my-rank?type=TOTAL` - 내 순위 🔒
+- `GET /api/v1/leaderboard/top-users?type=TOTAL&limit=100` - 리더보드 조회 
+- `GET /api/v1/leaderboard/my-rank?type=TOTAL` - 내 순위 
 
 ### NFT - 5개
-- `GET /api/v1/nft/my-nfts` - 내 NFT 목록 🔒
-- `GET /api/v1/nft/benefits` - NFT 혜택 정보 🔒
-- `POST /api/v1/nft/mint-user-pass` - User Pass 발급 🔒
-- `POST /api/v1/nft/upgrade-tier` - Tier NFT 업그레이드 🔒
-- `POST /api/v1/nft/:nftId/burn` - NFT 소각 🔒
+- `GET /api/v1/nft/my-nfts` - 내 NFT 목록 
+- `GET /api/v1/nft/benefits` - NFT 혜택 정보 
+- `POST /api/v1/nft/mint-user-pass` - User Pass 발급 
+- `POST /api/v1/nft/upgrade-tier` - Tier NFT 업그레이드 
+- `POST /api/v1/nft/:nftId/burn` - NFT 소각 
 
 ### 추천 (Referral) - 6개
-- `POST /api/v1/referrals/register` - 추천 코드 등록 🔒
-- `GET /api/v1/referrals/my-referrals` - 내가 추천한 사용자 🔒
-- `GET /api/v1/referrals/my-referrer` - 나를 추천한 사용자 🔒
-- `GET /api/v1/referrals/stats` - 추천 통계 🔒
-- `GET /api/v1/referrals/my-link` - 내 추천 링크 (QR 코드) 🔒
-- `GET /api/v1/referrals/x-share-url?type=referral` - X 공유 URL 🔒
+- `POST /api/v1/referrals/register` - 추천 코드 등록 
+- `GET /api/v1/referrals/my-referrals` - 내가 추천한 사용자 
+- `GET /api/v1/referrals/my-referrer` - 나를 추천한 사용자 
+- `GET /api/v1/referrals/stats` - 추천 통계 
+- `GET /api/v1/referrals/my-link` - 내 추천 링크 (QR 코드) 
+- `GET /api/v1/referrals/x-share-url?type=referral` - X 공유 URL 
 
 ### 튜토리얼 (Tutorial) - 2개
-- `GET /api/v1/tutorial/progress` - 튜토리얼 진행도 🔒
-- `POST /api/v1/tutorial/complete/:stepId` - 단계 완료 🔒
+- `GET /api/v1/tutorial/progress` - 튜토리얼 진행도 
+- `POST /api/v1/tutorial/complete/:stepId` - 단계 완료 
 
 ### FAQ - 2개
 - `GET /api/v1/faq/list?category=GENERAL` - FAQ 목록
 - `GET /api/v1/faq/:id` - FAQ 상세
 
 ### 이벤트 (Events) - 2개
-- `POST /api/v1/events/participate` - 이벤트 참여 🔒
-- `GET /api/v1/events/my-participations?eventType=VOTE` - 내 참여 내역 🔒
+- `POST /api/v1/events/participate` - 이벤트 참여 
+- `GET /api/v1/events/my-participations?eventType=VOTE` - 내 참여 내역 
 
-🔒 = JWT 인증 필요
+JWT 인증 필요
 
 자세한 API 명세는 [docs/03-API-DESIGN.md](docs/03-API-DESIGN.md) 참고
 
 ---
 
-## ⚙️ Queue Jobs (Bull + Redis)
+##  Queue Jobs (Bull + Redis)
 
 ### 구현된 Job 프로세서
 
@@ -446,7 +434,7 @@ PORT="3000"
 | **leaderboard-snapshot** | 매일 01:00 KST | 리더보드 스냅샷 생성 (ALL, 1D, 1W, 1M, 3M) |
 | **referral-tracking** | 매일 02:00 KST | 추천 진행도 업데이트 |
 
-자세한 스펙은 [docs/11-QUEUE-JOBS-SPEC.md](docs/11-QUEUE-JOBS-SPEC.md) 참고
+
 
 ---
 
@@ -489,7 +477,7 @@ npm run test:cov
 
 ## 🎯 개발 로드맵
 
-### Phase 1: MVP 개발 (2개월) ✅ 완료
+### Phase 1: MVP 개발 
 
 - [x] 프로젝트 기획 및 설계
 - [x] 문서화 완료 (12개 문서)
@@ -511,7 +499,7 @@ npm run test:cov
 - [x] GitHub 저장소 설정
 - [x] 프론트엔드/블록체인 폴더 구조 생성
 
-### Phase 2: 스마트 컨트랙트 & 프론트엔드 (2개월) 🚧 진행 중
+### Phase 2: 스마트 컨트랙트 & 프론트엔드 진행 중
 
 - [ ] 스마트 컨트랙트 개발
   - [ ] XYLOUserPass (ERC-721 SBT)
@@ -553,8 +541,6 @@ npm run test:cov
 - **최소 운영 기간**: 6개월
 
 ---
-
-## 🤝 기여 가이드
 
 ### 브랜치 전략
 
@@ -611,7 +597,7 @@ style(backend): fix linting errors
 
 ---
 
-## 🔄 CI/CD
+##  CI/CD
 
 ### GitHub Actions Workflows
 
@@ -652,7 +638,7 @@ npm run lint
 
 ---
 
-## 🛡️ 보안
+## 🛡️보안
 
 ### 환경변수 관리
 
@@ -731,47 +717,6 @@ npx tsc --noEmit  # 타입 체크만 수행
 ```
 
 ---
-
-## 📞 연락처
-
-- **GitHub Repository**: https://github.com/araeLaver/XYLO
-- **GitHub Issues**: https://github.com/araeLaver/XYLO/issues
-- **프로젝트 관리자**: araeLaver
-- **기술 문의**: GitHub Issues
-- **비즈니스 문의**: contact@xylomvp.world
-
----
-
-## 📄 라이선스
-
-Proprietary - Copyright © 2025 Creative Hill
-
-본 프로젝트는 상용 소프트웨어이며, 저작권은 Creative Hill에 있습니다.
-무단 복제, 배포, 수정을 금지합니다.
-
----
-
-## 🙏 감사의 글
-
-- **NestJS**: 강력한 TypeScript 백엔드 프레임워크
-- **Prisma**: 타입 안전한 ORM
-- **OpenZeppelin**: 스마트 컨트랙트 보안 라이브러리
-- **SOLV Protocol**: ERC-3525 표준 구현
-- **Unlock Protocol**: 멤버십 NFT 참고
-- **Galaxis**: 활동 기반 등급 구조 참고
-
----
-
-## 📊 프로젝트 통계
-
-- **총 코드 라인**: 60,000+ 라인
-- **모듈**: 10개 (Auth, Users, YouTube, Points, Leaderboard, NFT, Referral, Tutorial, FAQ, Events)
-- **API 엔드포인트**: 27개
-- **데이터베이스 테이블**: 14개
-- **Queue Jobs**: 5개 프로세서 (YouTube 크롤링, 포인트 계산, 리더보드, Tier 업그레이드, 추천 추적)
-- **문서**: 12개 상세 가이드
-- **컴파일 에러**: 0개 (Type-Safe 달성)
-- **비용**: $0-50/월 (Discord/X 무료 플랜 사용)
 
 ---
 
