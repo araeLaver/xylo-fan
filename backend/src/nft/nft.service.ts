@@ -460,9 +460,6 @@ export class NftService {
             <p style="margin: 0; color: #999; font-size: 12px;">
               © 2025 XYLO Fans. All rights reserved.
             </p>
-            <p style="margin: 10px 0 0 0; color: #999; font-size: 12px;">
-              🤖 Generated with <a href="https://claude.com/claude-code" style="color: #667eea; text-decoration: none;">Claude Code</a>
-            </p>
           </div>
 
         </div>
